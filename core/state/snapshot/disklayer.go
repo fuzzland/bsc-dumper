@@ -18,6 +18,7 @@ package snapshot
 
 import (
 	"bytes"
+	"fmt"
 	"sync"
 
 	"github.com/VictoriaMetrics/fastcache"
@@ -135,6 +136,22 @@ func (dl *diskLayer) AccountRLP(hash common.Hash) ([]byte, error) {
 		snapshotCleanAccountInexMeter.Mark(1)
 	}
 	return blob, nil
+}
+
+func (dl *diskLayer) StorageSnapshots(accountHash common.Hash) (map[common.Hash]string, error) {
+	dl.lock.RLock()
+	defer dl.lock.RUnlock()
+
+	res := make(map[common.Hash]string)
+
+	it := rawdb.IterateStorageSnapshots(dl.diskdb, accountHash)
+	for it.Next() {
+		v := it.Value()
+		_, content, _, _ := rlp.Split(v)
+		res[common.BytesToHash(it.Key()[1+len(accountHash):])] = fmt.Sprintf("%x", content)
+	}
+	it.Release()
+	return res, nil
 }
 
 // Storage directly retrieves the storage data associated with a particular hash,

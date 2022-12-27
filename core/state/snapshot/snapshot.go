@@ -129,6 +129,8 @@ type Snapshot interface {
 	// within a particular account.
 	Storage(accountHash, storageHash common.Hash) ([]byte, error)
 
+	StorageSnapshots(accountHash common.Hash) (map[common.Hash]string, error)
+
 	// Parent returns the subsequent layer of a snapshot, or nil if the base was
 	// reached.
 	Parent() snapshot

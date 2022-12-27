@@ -285,6 +285,28 @@ func (s *StateObject) GetCommittedState(db Database, key common.Hash) common.Has
 	return value
 }
 
+// GetCommittedState retrieves a value from the committed account storage trie.
+func (s *StateObject) GetCommittedStateAll(db Database) map[common.Hash]string {
+	if s.db.snap != nil {
+		if _, destructed := s.db.snapDestructs[s.address]; destructed {
+			return nil
+		}
+		// enc, err = s.db.snap.Storage(s.addrHash, crypto.Keccak256Hash(key.Bytes()))
+
+		it, err := s.db.snap.StorageSnapshots(s.addrHash)
+
+		if err != nil {
+			s.setError(err)
+			return nil
+		}
+
+		return it
+	}
+
+	return nil
+
+}
+
 // SetState updates a value in account storage.
 func (s *StateObject) SetState(db Database, key, value common.Hash) {
 	// If the fake storage is set, put the temporary state update here.

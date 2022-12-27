@@ -438,6 +438,15 @@ func (dl *diffLayer) Storage(accountHash, storageHash common.Hash) ([]byte, erro
 	return dl.storage(accountHash, storageHash, 0)
 }
 
+func (dl *diffLayer) StorageSnapshots(accountHash common.Hash) (map[common.Hash]string, error) {
+	dl.lock.RLock()
+	res, err := dl.origin.StorageSnapshots(accountHash)
+
+	dl.lock.RUnlock()
+
+	return res, err
+}
+
 // storage is an internal version of Storage that skips the bloom filter checks
 // and uses the internal maps to try and retrieve the data. It's meant  to be
 // used if a higher layer's bloom filter hit already.
